@@ -281,7 +281,7 @@ function renderPreviewCard() {
   $('#pcMeta').textContent = `${e.author || 'No author'} · ${kits} kit(s) · ${usedSampleIds().size} sound(s)`;
 }
 function renderProjName() {
-  $('#projName').textContent = (projPath ? projPath.split('/').pop() : 'Unsaved project') + (dirty ? ' •' : '');
+  const el = $('#projName'); if (el) el.textContent = (projPath ? projPath.split('/').pop() : 'Unsaved project') + (dirty ? ' •' : '');
 }
 
 /* ================================================================ render: kits/lcd/banks/grid */
@@ -364,7 +364,7 @@ function param(label, bind, min, max, step, value, fmt) {
 const FMT = {
   'L.tune': v => (v > 0 ? '+' : '') + (v | 0) + ' st',
   'L.fine': v => (v > 0 ? '+' : '') + (v | 0) + ' ct',
-  'L.start': v => (+v).toFixed(0) + ' ms',
+  'L.start': v => (+v % 1 ? (+v).toFixed(2) : (+v).toFixed(0)) + ' ms',
   'L.level': v => (+v <= -48 ? '-∞' : (+v).toFixed(1)) + ' dB',
   'L.pan': v => +v === 0 ? 'C' : (v < 0 ? 'L' + (-v) : 'R' + v),
   'A.speed': v => '×' + Math.pow(2, (v - 0.5) * 2).toFixed(2),
@@ -400,7 +400,7 @@ function soundParams(L) {
   const maxStart = Math.max(1, Math.floor(s.dur * 1000) - 5);
   return `<div class="wed"><canvas class="wed-cv" data-color="${curPad().mpce ? '#c6a2ff' : '#ff6b61'}" title="Click or drag to set the start point · Shift-drag = fine · scroll / pinch to zoom · double-click = fit"></canvas>
     <div class="wed-bar"><span>Start <b id="wedStart">${FMT['L.start'](L.start)}</b> of ${(s.dur * 1000).toFixed(0)} ms</span>
-      <span class="wed-zoom"><button class="btn tiny" data-wzoom="out" title="Zoom out">−</button><button class="btn tiny" data-wzoom="in" title="Zoom in on the start point">+</button><button class="btn tiny" data-wzoom="fit" title="Show the whole sample">Fit</button></span></div></div>
+      <span class="wed-zoom"><button class="btn tiny wed-zc" data-zerocross title="Snap the start to the last zero crossing before the sound comes in (skips silence / noise at the front)">Zero crossing</button><button class="btn tiny" data-wzoom="out" title="Zoom out">−</button><button class="btn tiny" data-wzoom="in" title="Zoom in on the start point">+</button><button class="btn tiny" data-wzoom="fit" title="Show the whole sample">Fit</button></span></div></div>
   <div class="params">
     ${param('Tune', 'L.tune', -36, 36, 1, L.tune, FMT['L.tune'])}
     ${param('Fine', 'L.fine', -99, 99, 1, L.fine, FMT['L.fine'])}
@@ -818,6 +818,51 @@ function paintWaveEditor() {
     g.fillStyle = 'rgba(255,255,255,.45)'; g.fillRect(v0 * w, h - 3, Math.max(2, (v1 - v0) * w), 3);
   }
 }
+/* Zero crossing: find where the sound comes in (first frame within 30 dB of the peak), then walk back to the
+ * last zero crossing before it, so playback starts right at the attack without a click. Analysed at the sample
+ * rate the file is exported at, so the start lands on the exact frame the MPC gets (stored as fractional ms). */
+const zcCache = new Map(); // sid -> { start ms } (decode is the slow part)
+async function findZeroCrossingStart(s) {
+  if (zcCache.has(s.id)) return zcCache.get(s.id);
+  const rate = s.ext === 'wav' && s.info && s.info.mpcSafe && s.info.rate ? s.info.rate : 44100;
+  const buf = await Audio.decodeAt(s.bytes, rate).catch(() => s.buffer);
+  const n = buf.length, chs = Array.from({ length: buf.numberOfChannels }, (_, c) => buf.getChannelData(c));
+  const x = new Float32Array(n);
+  for (const ch of chs) for (let i = 0; i < n; i++) x[i] += ch[i] / chs.length;
+  let peak = 0; for (let i = 0; i < n; i++) peak = Math.max(peak, Math.abs(x[i]));
+  if (!peak) return null;
+  // A DC offset in the lead-in would both look like sound and hide the real crossings, so measure it from the
+  // first 5 ms (only if that stretch is quiet and flat) and work relative to it.
+  const thr = peak * Math.pow(10, -30 / 20), head = Math.min(n, Math.round(rate * 0.005));
+  let dc = 0, lo = Infinity, hi = -Infinity;
+  for (let i = 0; i < head; i++) { dc += x[i]; lo = Math.min(lo, x[i]); hi = Math.max(hi, x[i]); }
+  dc = head && hi - lo < thr ? dc / head : 0;
+  const v = i => x[i] - dc;
+  let onset = 0; while (onset < n && Math.abs(v(onset)) < thr) onset++;
+  if (onset >= n) return null;
+  let at = -1;
+  const lim = Math.max(0, onset - Math.round(rate * 0.05));        // look back at most 50 ms
+  for (let i = onset; i > lim; i--) {
+    if (v(i) === 0) { at = i; break; }
+    if ((v(i) > 0) !== (v(i - 1) > 0)) { at = Math.abs(v(i - 1)) <= Math.abs(v(i)) ? i - 1 : i; break; }
+  }
+  if (at < 0) { at = onset; for (let i = onset; i >= lim; i--) if (Math.abs(v(i)) < Math.abs(v(at))) at = i; } // no crossing: quietest frame
+  const r = { start: at / rate * 1000, frame: at, rate };
+  zcCache.set(s.id, r);
+  return r;
+}
+async function snapZeroCrossing() {
+  const c = wedCtx(); if (!c) return;
+  const { L, s } = c;
+  const r = await findZeroCrossingStart(s);
+  if (!r) { toast('Couldn’t find where the sound starts in this sample', true); return; }
+  const max = Math.max(1, Math.floor(s.dur * 1000) - 5);
+  pushUndo(); L.start = Math.min(max, r.start); markDirty(); startChanged(L.start);
+  const sf = clamp(L.start / (s.dur * 1000), 0, 1);
+  const span = clamp(10 / (s.dur * 1000), 0.0005, 1);              // zoom to ~10 ms around the new start
+  wedView.v0 = clamp(sf - span * 0.3, 0, 1 - span); wedView.v1 = wedView.v0 + span; paintWaveEditor();
+  toast(r.frame ? `Start snapped to the zero crossing at ${FMT['L.start'](L.start)} (frame ${r.frame})` : 'The sound starts right at the beginning: start set to 0');
+}
 function startChanged(v) {
   const cv = detail.querySelector('.layer.on canvas'); if (cv) { cv.dataset.start = v; paintWaves(detail); }
   const r = detail.querySelector('input[type=range][data-bind="L.start"]'); if (r) r.value = v;
@@ -877,6 +922,7 @@ detail.addEventListener('click', e => {
   const t = e.target;
   const fv = t.closest('b[data-fmt]');
   if (fv) { if (!fv.querySelector('input')) { if (e.altKey) resetParam(fv.dataset.fmt); else editParam(fv); } return; }
+  if (t.closest('[data-zerocross]')) { snapZeroCrossing(); return; }
   const wz = t.closest('[data-wzoom]');
   if (wz) { const c = wedCtx(); if (!c) return; const z = wz.dataset.wzoom, sf = clamp((c.L.start || 0) / (c.s.dur * 1000), 0, 1);
     if (z === 'fit') { wedView.v0 = 0; wedView.v1 = 1; paintWaveEditor(); } else wedZoom(z === 'in' ? 0.25 : 4, z === 'in' ? sf : (wedView.v0 + wedView.v1) / 2); return; }
@@ -1350,7 +1396,6 @@ window.app = {
         try { const paths = await bridge('pickSamples'); if (paths && paths.length) importPaths(paths); } catch (e) { toast(e.message, true); }
         break;
       case 'export': doExport(false); break;
-      case 'exportKit': doExport(true); break;
       case 'sendMPC': sendToMPC(); break;
       case 'muteByColor': muteGroupsByColor(); break;
     }

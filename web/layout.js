@@ -11,12 +11,12 @@ const Layout = (() => {
     { k: 'browser', def: 360, min: 300, label: '<em>&#8981;</em>Sample Library' },
     { k: 'lib', def: 290, min: 210, label: '<em>4</em>Expansion Samples' },
     { k: 'pads', def: 520, min: 380, label: '<em>2</em>Kit' },
-    { k: 'detail', def: 360, min: 320, label: '<em>3</em>Pad details' },
-    { k: 'exp', def: 280, min: 220, label: '<em>1</em>Expansion · <em>5</em>Export' },
+    { k: 'detail', def: 500, min: 420, label: '<em>3</em>Pad details' },
+    { k: 'exp', def: 230, min: 200, label: '<em>1</em>Expansion · <em>5</em>Export' },
   ];
   // Expansion Samples starts folded (the pads already show what's in the kit). Bumping LAYOUT_V re-applies
   // the default order, folds and widths once for everyone.
-  const DEFAULT_FOLD = { lib: true }, LAYOUT_V = 3;
+  const DEFAULT_FOLD = { lib: true }, LAYOUT_V = 4;
   const byKey = Object.fromEntries(COLS.map(c => [c.k, c]));
   const FOLDED = 46, GUT = 14;
   const appEl = document.getElementById('app'), cols = document.querySelector('.cols');

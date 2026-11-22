@@ -457,3 +457,5 @@ h2 .col-fold { margin-left: auto; }
 [data-col] > h2 button, .br-head button, .br-head input, .kit-tools button { cursor: pointer; }
 .panel.col-moving { opacity: .75; outline: 2px dashed var(--red); outline-offset: -2px; }
 .col-reordering, .col-reordering * { cursor: grabbing !important; -webkit-user-select: none; user-select: none; }
+.wed-bar .btn.wed-zc { margin-right: 6px; color: var(--green); border-color: rgba(61, 220, 132, .45); }
+.wed-bar .btn.wed-zc:hover { background: rgba(61, 220, 132, .12); }

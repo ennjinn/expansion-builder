@@ -29,7 +29,8 @@ Requires macOS 13.4 or later (Apple Silicon or Intel). Windows support is planne
 - **MPCe pads** (on by default; Option-click or **M** toggles). There are 4 corners per pad, each with
   velocity layers, its own articulation (196 of the MPC's flams, rolls and drags), tune, start and reverse.
   Choose snap-to-corner or morph.
-- **Pad details.** One-shot / note-on, mono, mute groups, pad colours, and a large waveform for setting start points.
+- **Pad details.** One-shot / note-on, mono, mute groups, pad colours, and a large waveform for setting start points,
+  with a **Zero crossing** button that snaps the start to the exact point the sound comes in.
 - **Mute groups by colour.** One click gives every pad of the same colour (across all 8 banks) the same mute group.
 - **Sample Library.** Indexes your samples folder and sorts it into categories (kicks, snares, hats, loops, …)
   automatically. A built-in tuner shows the pitch of the sound you just played.

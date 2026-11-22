@@ -17,7 +17,7 @@ const Browser = (() => {
     view: [], counts: null, sel: -1,
   };
   try { Object.assign(st, JSON.parse(localStorage.getItem('eb.browser') || '{}')); } catch (e) {}
-  st.sel = -1; st.view = [];
+  st.sel = -1; st.view = []; st.show = true;   // always shown now (fold it from its header instead)
   const savePrefs = () => { try { localStorage.setItem('eb.browser', JSON.stringify({ root: st.root, show: st.show, cat: st.cat, pack: st.pack, dedupe: st.dedupe })); } catch (e) {} };
 
   const el = id => document.getElementById(id);
@@ -99,7 +99,6 @@ const Browser = (() => {
   }
   function render() {
     document.getElementById('app').classList.toggle('br-on', st.show);
-    el('brToggle').classList.toggle('on', st.show);
     if (!st.show) { reportDragRegion(); return; }
     el('brRoot').textContent = prettyRoot(st.rootAbs || st.root);
     el('brRoot').title = st.rootAbs || st.root;
@@ -178,7 +177,6 @@ const Browser = (() => {
   /* ---------------- events ---------------- */
   let searchT = 0;
   function bind() {
-    el('brToggle').addEventListener('click', e => { e.currentTarget.blur(); st.show = !st.show; savePrefs(); render(); requestAnimationFrame(() => { paintWaves(); reportDragRegion(); }); if (st.show && !st.rel.length && !st.loading) load(); });
     el('brCats').addEventListener('click', e => { const c = e.target.closest('[data-cat]'); if (!c) return; st.cat = c.dataset.cat; st.sel = -1; el('brList').scrollTop = 0; savePrefs(); render(); });
     el('brPack').addEventListener('change', e => { st.pack = e.target.value; st.sel = -1; el('brList').scrollTop = 0; savePrefs(); render(); });
     el('brDedupe').addEventListener('change', e => { st.dedupe = e.target.checked; st.sel = -1; savePrefs(); render(); });

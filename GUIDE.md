@@ -100,7 +100,7 @@ header** (or a folded strip) left or right. The app remembers the order, widths 
 | **2 · Kits** | Kit tabs, the kit name, 8 banks (A to H) of 16 pads |
 | **3 · Pad details** | Everything about the selected pad: samples, layers, articulation, sound, colour, mute group |
 | **4 · Expansion Samples** (folded by default) | The sounds you've added to this project |
-| **Sample Library** (toggle at top right) | Your whole samples folder, sorted into categories automatically |
+| **Sample Library** (left) | Your whole samples folder, sorted into categories automatically |
 | **Test sequencer** (bottom) | A small pattern editor for hearing your kit; it isn't exported |
 
 The small readout in the header shows the pitch of the last sound you played (for example, `D1 −13 ct`),
@@ -115,7 +115,7 @@ which is handy for tuning kicks and 808s.
 Use whichever way is quickest for you:
 
 - **Drag from Finder** onto a pad. Drop a **folder** to fill pads in order.
-- **Use the Sample Library.** Click **Sample Library** at the top right. The first time, click **Folder…** to choose your
+- **Use the Sample Library** (the panel on the left). The first time, click **Folder…** to choose your
   samples folder (it defaults to `~/Documents/Samples`). Sounds are sorted into Kicks, Snares, Hi-Hats,
   Loops and so on. Click a sound to hear it, then **drag it onto a pad**, or press **Enter**
   (or double-click) to put it on the selected pad. The arrow keys move through the list.
@@ -170,6 +170,9 @@ In the pad details for the selected pad (or corner):
 - **The waveform** sets the start point. Click or drag to set it, **Shift**-drag for fine moves,
   scroll to zoom, and double-click to see the whole sample. This is great for trimming the silence
   off the front of a sample.
+- **Zero crossing** (above the waveform's zoom buttons) does that trim for you: it finds where the sound comes
+  in and snaps the start to the last zero crossing just before it, accurate to the sample, so there's no click.
+  It zooms in so you can see where it landed. Undo (⌘Z) puts the old start back.
 
 Click any slider's number to type an exact value. **Option-click** or double-click a slider to reset it.
 **⌘Z** undoes and **⇧⌘Z** redoes.
@@ -244,7 +247,6 @@ you'll end up with two. Delete the old one from the **Expansions** tab in MPC Br
 Export options:
 - **Render kit preview audio** makes the short demo you hear when browsing kits on the MPC.
 - **Also make a .zip** is handy for sharing the expansion.
-- **Current kit only** exports just the selected kit as a drum track, without the expansion around it.
 
 ---
 

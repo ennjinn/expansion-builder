@@ -17,13 +17,11 @@
     </div>
     <div id="tuner" class="tuner" title="Fundamental of the last sound played"></div>
     <div class="top-actions">
-      <span id="projName" class="proj-name"></span>
       <div id="mpcConn" class="mpc-conn none" title="">
         <i class="dot"></i><span id="mpcConnText">No Wi-Fi MPC connection</span>
         <button class="btn tiny" id="mpcConnBtn">Connect</button>
       </div>
       <button class="btn bridge-btn" id="bridgeBtn" title="Grab projects and audio from your MPC over Wi-Fi">📡 MPC Bridge <span class="caret">▾</span></button>
-      <button class="btn ghost" id="brToggle" title="Show / hide the Sample Library">Sample Library</button>
       <button class="btn ghost" data-act="new">New</button>
       <button class="btn ghost" data-act="open">Open…</button>
       <button class="btn ghost" data-act="save">Save</button>
@@ -65,7 +63,7 @@
       </div>
       <h2><em>1</em>Expansion<button class="col-fold" data-fold="exp" title="Collapse this panel">‹</button></h2>
       <div id="art" class="art" title="Click or drop an image">
-        <div class="art-empty">Drop cover art<br><small>or click to choose · square works best</small></div>
+        <div class="art-empty">Drop cover art</div>
       </div>
       <div class="art-row"><button class="btn small" id="artRemove">Remove image</button></div>
       <label>Expansion name<input id="expName" placeholder="Trap Drums Vol. 1"></label>
@@ -88,7 +86,6 @@
       </div>
       <button class="btn primary big" data-act="export">⬇ Export expansion</button>
       <button class="btn primary big" data-act="sendMPC" title="Builds the expansion and copies it straight into Expansions on the MPC">📡 Send to MPC</button>
-      <button class="btn big" data-act="exportKit">Current kit only (no expansion)</button>
       <h2 class="mt">MPC over Wi-Fi</h2>
       <div id="mpcBox" class="mpc-box">
         <label>MPC address<input id="mpcHost" placeholder="e.g. 192.168.1.50"></label>
