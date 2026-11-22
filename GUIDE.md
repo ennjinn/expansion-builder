@@ -13,6 +13,7 @@ the finished expansion onto your MPC.
 - [8. Try it with the test sequencer](#8-try-it-with-the-test-sequencer)
 - [9. Name it, add cover art, and save](#9-name-it-add-cover-art-and-save)
 - [10. Get it onto your MPC](#10-get-it-onto-your-mpc)
+- [11. MPC Bridge: copy songs from your MPC to your Mac](#11-mpc-bridge-copy-songs-from-your-mpc-to-your-mac)
 - [Keyboard shortcuts](#keyboard-shortcuts)
 - [Troubleshooting](#troubleshooting)
 
@@ -74,6 +75,16 @@ At the bottom of the left-hand **Export** panel, under **MPC over Wi-Fi**:
 | **SSH password** | Leave it **blank** |
 
 The app remembers these settings, so you only enter them once.
+
+### Check the connection light
+
+The header at the top of the window shows whether the app can reach your MPC:
+
+- 🟢 **Connected to MPC …** — all set. It shows your MPC's model name.
+- 🔴 **No Wi-Fi MPC connection** with a **Connect** button — click Connect to try again. If there's no address yet,
+  or the MPC still can't be reached, MPC Bridge opens so you can enter or fix the IP address.
+
+The light checks again every 30 seconds and whenever you switch back to the app.
 
 ---
 
@@ -234,6 +245,29 @@ Export options:
 
 ---
 
+## 11. MPC Bridge: copy songs from your MPC to your Mac
+
+**📡 MPC Bridge** (top right, next to the connection light) works the other way round from Send to MPC: it copies
+things **from** your MPC to your Mac over Wi-Fi. It needs the same setup as [section 2](#2-set-up-your-mpc-for-wi-fi-sending-optional).
+
+1. **Save** your song on the MPC. MPC Bridge copies the last saved version.
+2. Click **📡 MPC Bridge**. It looks on all the MPC's drives (internal, SD card, USB) and lists what it finds:
+   - **Projects** — your saved songs, newest first, with date and size. Each one is copied *complete*: the
+     `.xpj` file plus its `_[ProjectData]` folder with all the samples, ready to open in the MPC desktop software
+     or to copy back to an MPC later.
+   - **Audio** — the newest WAV files on the MPC. Export a mixdown or stems on the MPC first, then press **⟳** and
+     they appear here.
+3. Tick what you want (or **Select all**).
+4. **Save to:** click **Choose…** to pick a folder on your Mac. The app remembers it.
+5. Click **⬇ Grab**. If something with the same name is already in that folder, you're asked before it's replaced.
+   With **Show in Finder when done** ticked, the folder opens when it's finished.
+
+Expansions, plugins, Splice downloads and the MPC's temporary recordings are left out of the lists.
+
+It's also an easy way to back up all your projects: Select all, then Grab.
+
+---
+
 ## Keyboard shortcuts
 
 | Key | Action |
@@ -251,7 +285,7 @@ Export options:
 
 ## Troubleshooting
 
-**"Send to MPC failed"**
+**The header says "No Wi-Fi MPC connection"** — or **"Send to MPC failed"**
 - Check that the MPC is on, connected to Wi-Fi, and on the **same network** as your Mac.
 - Check the IP address again (Preferences → Wi-Fi on the MPC). It can change after a restart.
 - Check that developer mode is still on.

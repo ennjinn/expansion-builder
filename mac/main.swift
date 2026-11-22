@@ -370,6 +370,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
         case "sendToMPC":
             sendToMPC(src: str("src"), host: str("host"), password: str("password"), drive: str("drive"), done: done)
 
+        case "mpcPing":
+            mpcPing(host: str("host"), password: str("password"), done: done)
+
+        case "mpcList":
+            mpcList(host: str("host"), password: str("password"), done: done)
+
+        case "mpcGrab":
+            mpcGrab(host: str("host"), password: str("password"), path: str("path"), kind: str("kind"), dest: str("dest"), done: done)
+
         default:
             done(false, "Unknown command \(cmd)")
         }
@@ -470,6 +479,92 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
             done(ok, ok ? "\(dest)/\(name)" : (msg.isEmpty ? "Could not reach the MPC at \(host)" : msg))
         }
     }
+    /// ssh environment for the MPC: an askpass helper that answers with the password (or none at all when it's blank —
+    /// developer mode's SSH normally accepts any login). Call the returned cleanup when the command has finished.
+    func mpcSSH(_ password: String) -> (env: [String: String], cleanup: () -> Void) {
+        let tmp = FileManager.default.temporaryDirectory.appendingPathComponent("eb-askpass-\(UUID().uuidString).sh")
+        try? "#!/bin/sh\necho \"$EB_MPC_PW\"\n".write(to: tmp, atomically: true, encoding: .utf8)
+        chmod(tmp.path, 0o700)
+        var env = ["SSH_ASKPASS": tmp.path, "SSH_ASKPASS_REQUIRE": "force", "DISPLAY": ":0", "EB_MPC_PW": password]
+        if password.isEmpty { env["SSH_ASKPASS_REQUIRE"] = "never" }
+        return (env, { try? FileManager.default.removeItem(at: tmp) })
+    }
+    func sshPrefix(_ host: String) -> String {
+        "/usr/bin/ssh -o ConnectTimeout=8 -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=10 root@\(shq(host))"
+    }
+    func cleanSSH(_ out: String, _ host: String) -> String {
+        let msg = out.split(separator: "\n").filter { !$0.hasPrefix("Warning: Permanently added") }.joined(separator: "\n")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return msg.isEmpty ? "Could not reach the MPC at \(host)" : msg
+    }
+
+    /// Header connection light: a quick ssh login that reports the MPC's model name.
+    func mpcPing(host: String, password: String, done: @escaping (Bool, Any?) -> Void) {
+        guard !host.isEmpty else { return done(false, "No MPC address") }
+        let ssh = mpcSSH(password)
+        let remote = "tr -d '\\0' < /proc/device-tree/model 2>/dev/null; echo; echo EB_OK"
+        run("/bin/sh", ["-c", "\(sshPrefix(host).replacingOccurrences(of: "ConnectTimeout=8", with: "ConnectTimeout=4")) \(shq(remote)) </dev/null"], env: ssh.env) { code, out in
+            ssh.cleanup()
+            guard code == 0, out.contains("EB_OK") else { return done(false, self.cleanSSH(out, host)) }
+            let model = out.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.first { !$0.isEmpty && $0 != "EB_OK" && !$0.hasPrefix("Warning:") } ?? ""
+            done(true, ["model": model])
+        }
+    }
+
+    /// MPC Bridge: lists projects (.xpj, with the size of their _[ProjectData]) and the newest audio files on every
+    /// mounted MPC drive. Expansions, plugins, Splice, factory content and temporary recordings are skipped.
+    func mpcList(host: String, password: String, done: @escaping (Bool, Any?) -> Void) {
+        guard !host.isEmpty else { return done(false, "Enter the MPC address first") }
+        let script = #"""
+        scan() { r=$1; shift; find "$r" -maxdepth 6 \( -name Expansions -o -name Synths -o -name "VST2 Plugins" -o -name Splice -o -name Features -o -name "Temporary Files" -o -name "*_\[ProjectData\]" -o -name ".*" \) -prune -o -type f "$@"; }
+        for root in /nvme /media/*; do
+          [ -d "$root" ] && grep -qF " $root " /proc/mounts || continue
+          echo "D	$root"
+          scan "$root" -iname "*.xpj" -print 2>/dev/null | while IFS= read -r f; do
+            d="${f%.*}_[ProjectData]"; b=0; [ -d "$d" ] && b=$(find "$d" -type f -exec stat -c %s {} + 2>/dev/null | awk '{t+=$1} END{printf "%.0f", t}')
+            echo "P	$(stat -c %Y "$f")	$(( $(stat -c %s "$f") + ${b:-0} ))	$f"
+          done
+          scan "$root" -iname "*.wav" -size +1k -exec stat -c "A	%Y	%s	%n" {} + 2>/dev/null | sort -t "	" -k2,2nr | head -n 200
+        done
+        echo EB_OK
+        """#
+        let ssh = mpcSSH(password)
+        run("/bin/sh", ["-c", "\(sshPrefix(host)) \(shq(script)) </dev/null"], env: ssh.env) { code, out in
+            ssh.cleanup()
+            guard code == 0, out.contains("EB_OK") else { return done(false, self.cleanSSH(out, host)) }
+            var items: [[String: Any]] = [], drives: [String] = []
+            for line in out.split(separator: "\n") {
+                let f = line.split(separator: "\t", maxSplits: 3, omittingEmptySubsequences: false).map(String.init)
+                if f.count == 2 && f[0] == "D" { drives.append(f[1]); continue }
+                guard f.count == 4, f[0] == "P" || f[0] == "A" else { continue }
+                items.append(["kind": f[0] == "P" ? "project" : "audio", "mtime": (Double(f[1]) ?? 0) * 1000,
+                              "size": Double(f[2]) ?? 0, "path": f[3]])
+            }
+            done(true, ["items": items, "drives": drives])
+        }
+    }
+
+    /// MPC Bridge: copies a project (its .xpj plus the _[ProjectData] folder beside it) or one audio file from the MPC
+    /// into dest, streamed as tar over ssh. Returns the local path of the .xpj / audio file.
+    func mpcGrab(host: String, password: String, path: String, kind: String, dest: String, done: @escaping (Bool, Any?) -> Void) {
+        guard !host.isEmpty, path.hasPrefix("/"), !dest.isEmpty else { return done(false, "Missing MPC address, file or destination") }
+        let fm = FileManager.default
+        do { try fm.createDirectory(atPath: dest, withIntermediateDirectories: true) } catch { return done(false, error.localizedDescription) }
+        let u = URL(fileURLWithPath: path), parent = u.deletingLastPathComponent().path, name = u.lastPathComponent
+        var remote = "cd \(shq(parent)) && tar -cf - \(shq(name))"
+        if kind == "project" {
+            let data = u.deletingPathExtension().lastPathComponent + "_[ProjectData]"
+            remote = "cd \(shq(parent)) && if [ -d \(shq(data)) ]; then tar -cf - \(shq(name)) \(shq(data)); else tar -cf - \(shq(name)); fi"
+        }
+        let shell = "set -o pipefail; \(sshPrefix(host)) \(shq(remote)) </dev/null | /usr/bin/tar -xf - -C \(shq(dest))"
+        let ssh = mpcSSH(password)
+        run("/bin/bash", ["-c", shell], env: ssh.env) { code, out in
+            ssh.cleanup()
+            let local = (dest as NSString).appendingPathComponent(name)
+            if code == 0 && fm.fileExists(atPath: local) { done(true, local) } else { done(false, self.cleanSSH(out, host)) }
+        }
+    }
+
     func outboxURL() -> URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("Expansion Builder/Outbox", isDirectory: true).standardizedFileURL

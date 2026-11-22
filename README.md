@@ -4,7 +4,7 @@ A Mac app for building your own **MPC expansions**, including **MPCe** kits for 
 expressive pads: every pad corner gets its own samples, velocity layers, articulation, tune and start point.
 
 Drop samples on pads, colour them, audition them with the built-in test sequencer, then export the
-expansion to a folder or send it straight to your MPC over Wi-Fi.
+expansion to a folder or send it straight to your MPC over Wi-Fi. MPC Bridge copies your MPC songs back to your Mac.
 
 ## Download
 
@@ -36,6 +36,8 @@ Requires macOS 13.4 or later (Apple Silicon or Intel). Windows support is planne
 - **Test sequencer.** Program a quick pattern to hear the kit. It's for previewing only and isn't exported.
 - **Export** writes a ready-to-use expansion folder, with optional preview audio and a .zip.
 - **Send to MPC** copies the expansion straight into `Expansions` on your MPC over Wi-Fi.
+- **MPC Bridge** copies the other way: it lists the projects and audio exports on your MPC and grabs them to your Mac
+  over Wi-Fi, samples and all. A light in the header shows whether the MPC is connected.
 
 ## Send to MPC over Wi-Fi
 

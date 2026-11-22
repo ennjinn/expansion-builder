@@ -1128,9 +1128,10 @@ async function doExport(kitOnly = false, rootOverride = null, send = false) {
       busy(`Sending to MPC at ${host}…`);
       try {
         const where = await bridge('sendToMPC', { src: base, host, password: $('#mpcPw').value, drive: $('#mpcDrive').value.trim() || 'nvme' });
+        if (typeof MpcConn !== 'undefined') MpcConn.set('ok');
         log(`✓ On the MPC: ${where}`, 'ok'); log('If it does not show yet, re-open Browse → Expansions on the MPC.');
         busy(false); toast('Sent to MPC');
-      } catch (err) { busy(false); log('Send to MPC failed: ' + err.message, 'err'); toast('Send to MPC failed — is the MPC on and on Wi-Fi?', true); }
+      } catch (err) { busy(false); if (typeof MpcConn !== 'undefined') MpcConn.check(); log('Send to MPC failed: ' + err.message, 'err'); toast('Send to MPC failed — is the MPC on and on Wi-Fi?', true); }
       return;
     }
     busy(false);

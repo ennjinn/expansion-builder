@@ -19,10 +19,39 @@
     <div id="tuner" class="tuner" title="Fundamental of the last sound played"></div>
     <div class="top-actions">
       <span id="projName" class="proj-name"></span>
+      <div id="mpcConn" class="mpc-conn none" title="">
+        <i class="dot"></i><span id="mpcConnText">No Wi-Fi MPC connection</span>
+        <button class="btn tiny" id="mpcConnBtn">Connect</button>
+      </div>
+      <button class="btn bridge-btn" id="bridgeBtn" title="Grab projects and audio from your MPC over Wi-Fi">📡 MPC Bridge <span class="caret">▾</span></button>
       <button class="btn ghost" id="brToggle" title="Show / hide the sample browser">Browser</button>
       <button class="btn ghost" data-act="new">New</button>
       <button class="btn ghost" data-act="open">Open…</button>
       <button class="btn ghost" data-act="save">Save</button>
+    </div>
+    <div id="bridgePop" class="bridge-pop" hidden>
+      <div class="bp-head">
+        <h2><span class="bp-ico">📡</span>MPC Bridge</h2>
+        <button class="btn small ghost" id="bpRefresh" title="Look on the MPC again">⟳</button>
+        <button class="btn small ghost" id="bpClose" title="Close (Esc)">✕</button>
+      </div>
+      <p class="bp-sub">Copy songs and audio from your MPC to this Mac over Wi-Fi.</p>
+      <label class="bp-host">MPC address<input id="bpHost" placeholder="e.g. 192.168.1.50" spellcheck="false"></label>
+      <div class="bp-tabs">
+        <div class="seg"><button data-bptab="project" class="on">Projects <i></i></button><button data-bptab="audio">Audio <i></i></button></div>
+        <button class="btn tiny ghost" id="bpAll">Select all</button>
+      </div>
+      <div class="bp-list" id="bpList"></div>
+      <div class="bp-dest">
+        <span class="lbl">Save to</span>
+        <code id="bpDest" class="unset">Choose a folder…</code>
+        <button class="btn small" id="bpChoose">Choose…</button>
+      </div>
+      <div class="bp-foot">
+        <label class="chk"><input type="checkbox" id="bpReveal" checked> Show in Finder when done</label>
+        <button class="btn primary" id="bpGrab" disabled>⬇ Grab selected</button>
+      </div>
+      <div id="bpLog" class="log" hidden></div>
     </div>
   </header>
 
@@ -169,5 +198,6 @@
 <script src="app.js"></script>
 <script src="layout.js"></script>
 <script src="browser.js"></script>
+<script src="bridge.js"></script>
 </body>
 </html>

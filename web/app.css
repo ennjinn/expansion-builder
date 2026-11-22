@@ -388,3 +388,51 @@ h2 .col-fold { margin-left: auto; }
 .param .ph b[data-fmt]:hover { color: #fff; text-decoration: underline dotted #6b6b76; text-underline-offset: 3px; }
 .val-edit { display: inline-block; width: 74px; margin: -3px 0; padding: 1px 6px; font: 600 11.5px var(--mono); text-align: right; border-radius: 5px; border-color: #6b6b76; }
 #testVelV { cursor: text; }
+
+/* MPC Bridge (header dropdown: grab projects / audio from the MPC) */
+.top { position: relative; }
+.bridge-btn { background: linear-gradient(180deg, #2a2340, #221c33); border-color: #4a3a6a; color: #d9c6ff; }
+.bridge-btn .caret { font-size: 10px; opacity: .7; }
+.bridge-btn.on { background: var(--violet-soft); border-color: var(--violet); color: #fff; }
+.bridge-pop { position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; width: 540px; max-height: calc(100vh - 120px); display: flex; flex-direction: column;
+  background: linear-gradient(180deg, #212127, #1b1b20); border: 1px solid #3a3a44; border-radius: 16px; padding: 16px; box-shadow: 0 24px 60px rgba(0, 0, 0, .6); -webkit-app-region: no-drag; }
+.bridge-pop[hidden] { display: none; }
+.bp-head { display: flex; align-items: center; gap: 6px; }
+.bp-head h2 { margin: 0; flex: 1; }
+.bp-ico { font-size: 16px; }
+.bp-sub { margin: 6px 0 12px; color: var(--dim); font-size: 12.5px; }
+.bp-host { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-size: 12px; color: var(--dim); }
+.bp-host input { flex: 1; }
+.bp-tabs { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.bp-tabs .seg button i { font-style: normal; opacity: .6; margin-left: 4px; font-size: 11px; }
+.bp-list { flex: 1; min-height: 120px; max-height: 340px; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--bg2); }
+.bp-row { display: flex; align-items: center; gap: 12px; padding: 9px 12px; margin: 0; border-bottom: 1px solid #26262c; cursor: pointer; color: var(--text); }
+.bp-row:last-child { border-bottom: 0; }
+.bp-row:hover { background: #222228; }
+.bp-row.on { background: var(--violet-soft); }
+.bp-row input { flex: none; }
+.bp-nm { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.bp-nm b { font-weight: 600; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bp-nm small, .bp-meta small { color: var(--faint); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bp-meta { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 12px; color: var(--dim); }
+.bp-empty { padding: 28px 18px; text-align: center; color: var(--dim); font-size: 13px; line-height: 1.5; }
+.bp-empty.err { color: var(--red); }
+.bp-empty small { color: var(--faint); }
+.bp-dest { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.bp-dest .lbl { font-size: 12px; color: var(--dim); flex: none; }
+.bp-dest code { flex: 1; min-width: 0; font: 12px var(--mono); padding: 7px 10px; border-radius: 8px; background: var(--bg2); border: 1px solid var(--line); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: rtl; text-align: left; cursor: pointer; }
+.bp-dest code.unset { color: var(--faint); direction: ltr; font-family: var(--sans); }
+.bp-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; }
+.bp-foot .btn.primary:disabled { opacity: .45; cursor: default; }
+
+/* header: Wi-Fi MPC connection light */
+.mpc-conn { display: flex; align-items: center; gap: 8px; padding: 5px 6px 5px 12px; border-radius: 999px; border: 1px solid #3a3a42; background: #1c1c21; font-size: 12px; color: var(--dim); white-space: nowrap; -webkit-app-region: no-drag; }
+.mpc-conn .dot { width: 9px; height: 9px; border-radius: 50%; background: #55555f; flex: none; }
+.mpc-conn.ok { border-color: rgba(52, 199, 89, .45); background: rgba(52, 199, 89, .08); color: #b9f0c8; padding-right: 12px; }
+.mpc-conn.ok .dot { background: #34c759; box-shadow: 0 0 0 3px rgba(52, 199, 89, .2), 0 0 10px #34c759; }
+.mpc-conn.ok .btn { display: none; }
+.mpc-conn.checking .dot { background: #ffcc00; animation: mpcPulse 1s ease-in-out infinite; }
+.mpc-conn.checking .btn { display: none; }
+.mpc-conn.checking { padding-right: 12px; }
+.mpc-conn.fail .dot { background: var(--red); }
+@keyframes mpcPulse { 50% { opacity: .3; } }
