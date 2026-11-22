@@ -436,3 +436,19 @@ h2 .col-fold { margin-left: auto; }
 .mpc-conn.checking { padding-right: 12px; }
 .mpc-conn.fail .dot { background: var(--red); }
 @keyframes mpcPulse { 50% { opacity: .3; } }
+.btn.danger { background: #3a1614; border-color: #ff5b51; color: #ff8a82; font-weight: 700; }
+.btn.danger:hover:not(:disabled) { background: #521c18; color: #fff; }
+.bp-row.locked { cursor: default; opacity: .6; }
+.bp-row.locked:hover { background: none; }
+.bp-lock { flex: none; width: 13px; text-align: center; font-size: 11px; }
+.bp-tag { display: inline-block; margin-left: 6px; padding: 0 5px; border-radius: 4px; background: #2a2a31; color: var(--faint); font-size: 10px; font-weight: 600; vertical-align: 1px; }
+.seq { position: relative; }
+.seq-grip { position: absolute; left: 0; right: 0; top: -4px; height: 9px; cursor: row-resize; z-index: 5; }
+.seq-grip::after { content: ''; position: absolute; left: 50%; top: 3px; width: 44px; height: 3px; margin-left: -22px; border-radius: 2px; background: #3a3a42; transition: background .15s; }
+.seq-grip:hover::after, .row-resizing .seq-grip::after { background: var(--red); }
+.row-resizing, .row-resizing * { cursor: row-resize !important; }
+.seq-head { cursor: pointer; }
+.seq-head > * { cursor: auto; }
+.seq-head h2, .seq-head .seq-hint { cursor: pointer; }
+.seq.folded { padding-bottom: 10px; }
+.seq-body { flex: 1; }

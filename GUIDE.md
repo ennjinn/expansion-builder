@@ -205,6 +205,8 @@ The bar at the bottom of the window is a small step sequencer for hearing your k
   its velocity, and click it again to remove it.
 - **Space** plays and stops. Set the tempo in **BPM**.
 - **M** and **S** on each row mute and solo it. Mute groups work here like they do on the MPC.
+- **Drag the bar on its top edge** to make the sequencer taller or shorter (double-click the bar to reset it).
+  Click **▾** or the header to fold it away. The app remembers both.
 
 ---
 
@@ -230,7 +232,7 @@ all its samples, so it still works if you move or delete the originals. Use **Op
 3. On the MPC, open **Browse → Expansions**. Your expansion is there.
 
 Sending again with the **same expansion name** replaces the copy on the MPC. If you rename the expansion,
-you'll end up with two, and you can delete the old one on the MPC.
+you'll end up with two. Delete the old one from the **Expansions** tab in MPC Bridge ([section 11](#11-mpc-bridge-copy-songs-from-your-mpc-to-your-mac)).
 
 ### Option B: Export and copy by USB
 
@@ -265,6 +267,14 @@ things **from** your MPC to your Mac over Wi-Fi. It needs the same setup as [sec
 Expansions, plugins, Splice downloads and the MPC's temporary recordings are left out of the lists.
 
 It's also an easy way to back up all your projects: Select all, then Grab.
+
+### Deleting expansions from the MPC
+
+The **Expansions** tab lists every expansion installed on the MPC, with its maker and size. Tick the ones you
+want to remove and click **🗑 Delete from MPC**. You're asked to confirm, and it can't be undone.
+
+- Akai's own factory expansions are shown with a 🔒 and can't be deleted from here.
+- The MPC may keep showing a deleted expansion in its browser until you restart it.
 
 ---
 

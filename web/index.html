@@ -38,18 +38,19 @@
       <p class="bp-sub">Copy songs and audio from your MPC to this Mac over Wi-Fi.</p>
       <label class="bp-host">MPC address<input id="bpHost" placeholder="e.g. 192.168.1.50" spellcheck="false"></label>
       <div class="bp-tabs">
-        <div class="seg"><button data-bptab="project" class="on">Projects <i></i></button><button data-bptab="audio">Audio <i></i></button></div>
+        <div class="seg"><button data-bptab="project" class="on">Projects <i></i></button><button data-bptab="audio">Audio <i></i></button><button data-bptab="expansion">Expansions <i></i></button></div>
         <button class="btn tiny ghost" id="bpAll">Select all</button>
       </div>
       <div class="bp-list" id="bpList"></div>
-      <div class="bp-dest">
+      <div class="bp-dest" id="bpDestRow">
         <span class="lbl">Save to</span>
         <code id="bpDest" class="unset">Choose a folder…</code>
         <button class="btn small" id="bpChoose">Choose…</button>
       </div>
       <div class="bp-foot">
-        <label class="chk"><input type="checkbox" id="bpReveal" checked> Show in Finder when done</label>
+        <label class="chk" id="bpRevealRow"><input type="checkbox" id="bpReveal" checked> Show in Finder when done</label>
         <button class="btn primary" id="bpGrab" disabled>⬇ Grab selected</button>
+        <button class="btn danger" id="bpDelete" disabled hidden>🗑 Delete from MPC</button>
       </div>
       <div id="bpLog" class="log" hidden></div>
     </div>
@@ -176,13 +177,14 @@
 
   <!-- TEST SEQUENCER (preview only — never exported) -->
   <section class="panel seq" id="seq">
-    <div class="seq-head">
+    <div class="seq-grip" id="seqGrip" title="Drag to resize the sequencer · double-click to reset"></div>
+    <div class="seq-head" title="Click an empty part of the bar to fold / unfold">
       <h2><em>♪</em>Test sequencer</h2>
       <button class="btn small seq-play" id="seqPlay" title="Play / stop (Space)">▶ Play</button>
       <label class="seq-bpm">BPM <input type="number" id="testBpm" min="40" max="300" step="1" value="120"></label>
       <button class="btn tiny" id="seqClear" title="Clear every note in this kit's pattern">Clear pattern</button>
       <span class="seq-hint">Click a step to add · drag sideways = length · drag up/down = velocity · click a note to remove · not exported</span>
-      <button class="btn tiny" id="seqFold" title="Show / hide the rows">▾</button>
+      <button class="btn tiny" id="seqFold" title="Fold / unfold the sequencer">▾</button>
     </div>
     <div class="seq-body" id="seqBody"></div>
   </section>

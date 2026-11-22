@@ -19,17 +19,19 @@ const MpcBridge = (() => {
   };
   const driveOf = p => st.drives.find(d => p.startsWith(d + '/')) || '';
   const driveName = d => d === '/nvme' ? 'Internal' : d.split('/').pop();
-  const display = it => it.path.split('/').pop().replace(/\.xpj$/i, '');
-  const where = it => { const d = driveOf(it.path); const rel = it.path.slice(d.length + 1).split('/').slice(0, -1).join(' / '); return `${driveName(d)}${rel ? ' · ' + rel : ''}`; };
+  const display = it => it.kind === 'expansion' ? (it.title || it.path.split('/').pop()) : it.path.split('/').pop().replace(/\.xpj$/i, '');
+  const where = it => {
+    if (it.kind === 'expansion') return [it.manufacturer, driveName(driveOf(it.path)), it.path.split('/').pop() !== it.title ? 'folder “' + it.path.split('/').pop() + '”' : ''].filter(Boolean).join(' · ');
+    const d = driveOf(it.path); const rel = it.path.slice(d.length + 1).split('/').slice(0, -1).join(' / '); return `${driveName(d)}${rel ? ' · ' + rel : ''}`; };
   const list = () => st.items.filter(i => i.kind === st.tab).sort((a, b) => b.mtime - a.mtime);
 
   function render() {
     const el = pop(); if (!el) return;
-    const nP = st.items.filter(i => i.kind === 'project').length, nA = st.items.length - nP;
+    const count = k => st.items.filter(i => i.kind === k).length, isExp = st.tab === 'expansion';
     $('#bpHost').value = host();
     el.querySelectorAll('[data-bptab]').forEach(b => {
       b.classList.toggle('on', b.dataset.bptab === st.tab);
-      b.querySelector('i').textContent = st.loadedFor ? (b.dataset.bptab === 'project' ? nP : nA) : '';
+      b.querySelector('i').textContent = st.loadedFor ? count(b.dataset.bptab) : '';
     });
     const rows = list();
     let body;
@@ -37,20 +39,24 @@ const MpcBridge = (() => {
     else if (st.error) body = `<div class="bp-empty err">${esc(st.error)}<br><small>Check that the MPC is on, on the same Wi-Fi as this Mac, and has developer mode switched on.</small></div>`;
     else if (!host()) body = '<div class="bp-empty">Enter your MPC’s IP address above (on the MPC: Preferences → Wi-Fi).</div>';
     else if (!st.loadedFor) body = '<div class="bp-empty">Press ⟳ to look on the MPC.</div>';
-    else if (!rows.length) body = `<div class="bp-empty">${st.tab === 'project' ? 'No saved projects found on the MPC.' : 'No audio files found. Export a mixdown or stems on the MPC first, then press ⟳.'}</div>`;
-    else body = rows.map(it => `<label class="bp-row ${st.sel.has(it.path) ? 'on' : ''}" title="${esc(it.path)}">
-        <input type="checkbox" data-bppath="${esc(it.path)}" ${st.sel.has(it.path) ? 'checked' : ''}>
-        <span class="bp-nm"><b>${esc(display(it))}</b><small>${esc(where(it))}</small></span>
+    else if (!rows.length) body = `<div class="bp-empty">${{ project: 'No saved projects found on the MPC.', audio: 'No audio files found. Export a mixdown or stems on the MPC first, then press ⟳.', expansion: 'No expansions installed on the MPC.' }[st.tab]}</div>`;
+    else body = rows.map(it => `<label class="bp-row ${st.sel.has(it.path) ? 'on' : ''} ${it.factory ? 'locked' : ''}" title="${esc(it.path)}${it.factory ? '\nAkai factory expansion: protected (remove it on the MPC if you really want to)' : ''}">
+        ${it.factory ? '<span class="bp-lock">🔒</span>' : `<input type="checkbox" data-bppath="${esc(it.path)}" ${st.sel.has(it.path) ? 'checked' : ''}>`}
+        <span class="bp-nm"><b>${esc(display(it))}${it.factory ? '<span class="bp-tag">FACTORY</span>' : ''}</b><small>${esc(where(it))}</small></span>
         <span class="bp-meta">${esc(fmtDate(it.mtime))}<small>${fmtSize(it.size)}</small></span></label>`).join('');
     $('#bpList').innerHTML = body;
-    const all = rows.length && rows.every(r => st.sel.has(r.path));
-    $('#bpAll').textContent = all ? 'Select none' : 'Select all'; $('#bpAll').hidden = !rows.length || st.loading;
+    const pickable = rows.filter(r => !r.factory), all = pickable.length && pickable.every(r => st.sel.has(r.path));
+    $('#bpAll').textContent = all ? 'Select none' : 'Select all'; $('#bpAll').hidden = !pickable.length || st.loading;
     $('#bpDest').textContent = pref.dest || 'Choose a folder…'; $('#bpDest').classList.toggle('unset', !pref.dest);
     $('#bpDest').title = pref.dest || '';
-    const chosen = st.items.filter(i => st.sel.has(i.path)), bytes = chosen.reduce((a, i) => a + i.size, 0);
+    const chosen = st.items.filter(i => st.sel.has(i.path) && (i.kind === 'expansion') === isExp), bytes = chosen.reduce((a, i) => a + i.size, 0);
     $('#bpGrab').disabled = !chosen.length;
     $('#bpGrab').textContent = chosen.length ? `⬇ Grab ${chosen.length} item${chosen.length > 1 ? 's' : ''} · ${fmtSize(bytes)}` : '⬇ Grab selected';
     $('#bpReveal').checked = pref.reveal !== false;
+    $('#bpGrab').hidden = $('#bpDestRow').hidden = $('#bpRevealRow').hidden = isExp; $('#bpDelete').hidden = !isExp;
+    $('#bpDelete').disabled = !chosen.length;
+    $('#bpDelete').textContent = chosen.length ? `🗑 Delete ${chosen.length} expansion${chosen.length > 1 ? 's' : ''} · ${fmtSize(bytes)}` : '🗑 Delete from MPC';
+    el.querySelector('.bp-sub').textContent = isExp ? 'Expansions installed on your MPC. Tick the ones to remove for good.' : 'Copy songs and audio from your MPC to this Mac over Wi-Fi.';
   }
 
   async function refresh() {
@@ -75,7 +81,7 @@ const MpcBridge = (() => {
   function bpLog(msg, cls = '') { const l = $('#bpLog'); l.hidden = false; l.innerHTML += `<div class="${cls}">${esc(msg)}</div>`; l.scrollTop = l.scrollHeight; }
 
   async function grab() {
-    const chosen = st.items.filter(i => st.sel.has(i.path)).sort((a, b) => a.kind.localeCompare(b.kind) || b.mtime - a.mtime);
+    const chosen = st.items.filter(i => st.sel.has(i.path) && i.kind !== 'expansion').sort((a, b) => a.kind.localeCompare(b.kind) || b.mtime - a.mtime);
     if (!chosen.length) return;
     const dest = pref.dest || await chooseDest(); if (!dest) return;
     const existing = [];
@@ -96,6 +102,24 @@ const MpcBridge = (() => {
     } else toast('Nothing was grabbed — see the list for the error', true);
   }
 
+  async function deleteExpansions() {
+    const chosen = st.items.filter(i => st.sel.has(i.path) && i.kind === 'expansion' && !i.factory);
+    if (!chosen.length) return;
+    const names = chosen.map(i => '• ' + display(i)).join('\n');
+    if (!confirm(`Delete ${chosen.length === 1 ? 'this expansion' : `these ${chosen.length} expansions`} from the MPC?\n\n${names}\n\nThis can’t be undone. Kits from it in saved projects will lose their samples.`)) return;
+    $('#bpLog').innerHTML = '';
+    let ok = 0;
+    for (const it of chosen) {
+      busy(`Deleting ${display(it)} from the MPC…`);
+      try { await bridge('mpcDeleteExpansion', { host: host(), password: $('#mpcPw').value, path: it.path }); ok++; st.sel.delete(it.path); bpLog(`✓ Deleted ${display(it)}`, 'ok'); }
+      catch (err) { bpLog(`✗ ${display(it)}: ${err.message}`, 'err'); }
+    }
+    busy(false);
+    toast(ok === chosen.length ? `Deleted ${ok} expansion${ok > 1 ? 's' : ''} from the MPC` : `Deleted ${ok} of ${chosen.length} — see the list for errors`, ok !== chosen.length);
+    if (ok) bpLog('The MPC may keep showing it in the browser until you restart it.');
+    await refresh();
+  }
+
   function open(on = !st.open) {
     st.open = on; pop().hidden = !on; $('#bridgeBtn').classList.toggle('on', on);
     if (on) { render(); if (host() && st.loadedFor !== host() && !st.loading) refresh(); }
@@ -113,7 +137,8 @@ const MpcBridge = (() => {
       else if (t.closest('#bpClose')) open(false);
       else if (t.closest('#bpChoose') || t.closest('#bpDest')) chooseDest();
       else if (t.closest('#bpGrab')) grab();
-      else if (t.closest('#bpAll')) { const rows = list(), all = rows.every(r => st.sel.has(r.path)); rows.forEach(r => all ? st.sel.delete(r.path) : st.sel.add(r.path)); render(); }
+      else if (t.closest('#bpDelete')) deleteExpansions();
+      else if (t.closest('#bpAll')) { const rows = list().filter(r => !r.factory), all = rows.every(r => st.sel.has(r.path)); rows.forEach(r => all ? st.sel.delete(r.path) : st.sel.add(r.path)); render(); }
     });
     el.addEventListener('change', e => {
       const t = e.target;

@@ -376,6 +376,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
         case "mpcList":
             mpcList(host: str("host"), password: str("password"), done: done)
 
+        case "mpcDeleteExpansion":
+            mpcDeleteExpansion(host: str("host"), password: str("password"), path: str("path"), done: done)
+
         case "mpcGrab":
             mpcGrab(host: str("host"), password: str("password"), path: str("path"), kind: str("kind"), dest: str("dest"), done: done)
 
@@ -525,6 +528,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
             echo "P	$(stat -c %Y "$f")	$(( $(stat -c %s "$f") + ${b:-0} ))	$f"
           done
           scan "$root" -iname "*.wav" -size +1k -exec stat -c "A	%Y	%s	%n" {} + 2>/dev/null | sort -t "	" -k2,2nr | head -n 200
+          for e in "$root"/Expansions/*/; do
+            [ -f "$e/Expansion.xml" ] || continue; e="${e%/}"
+            tag() { sed -n "s:.*<$1>\(.*\)</$1>.*:\1:p" "$e/Expansion.xml" | head -n 1 | tr -d '\t\r'; }
+            echo "E	$(stat -c %Y "$e")	$(( $(du -sk "$e" | cut -f1) * 1024 ))	$e	$(tag title)	$(tag manufacturer)	$(tag identifier)"
+          done
         done
         echo EB_OK
         """#
@@ -536,6 +544,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
             for line in out.split(separator: "\n") {
                 let f = line.split(separator: "\t", maxSplits: 3, omittingEmptySubsequences: false).map(String.init)
                 if f.count == 2 && f[0] == "D" { drives.append(f[1]); continue }
+                if line.hasPrefix("E\t") {
+                    let e = line.split(separator: "\t", omittingEmptySubsequences: false).map(String.init)
+                    guard e.count >= 7 else { continue }
+                    items.append(["kind": "expansion", "mtime": (Double(e[1]) ?? 0) * 1000, "size": Double(e[2]) ?? 0, "path": e[3],
+                                  "title": e[4], "manufacturer": e[5], "identifier": e[6],
+                                  "factory": e[6].lowercased().hasPrefix("com.akaipro.")])
+                    continue
+                }
                 guard f.count == 4, f[0] == "P" || f[0] == "A" else { continue }
                 items.append(["kind": f[0] == "P" ? "project" : "audio", "mtime": (Double(f[1]) ?? 0) * 1000,
                               "size": Double(f[2]) ?? 0, "path": f[3]])
@@ -562,6 +578,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler
             ssh.cleanup()
             let local = (dest as NSString).appendingPathComponent(name)
             if code == 0 && fm.fileExists(atPath: local) { done(true, local) } else { done(false, self.cleanSSH(out, host)) }
+        }
+    }
+
+    /// MPC Bridge: deletes one installed expansion folder (<drive>/Expansions/<name>). Refuses anything that isn't
+    /// directly inside an Expansions folder on a real mounted drive, has no Expansion.xml, or is an Akai factory one.
+    func mpcDeleteExpansion(host: String, password: String, path: String, done: @escaping (Bool, Any?) -> Void) {
+        let parts = path.split(separator: "/", omittingEmptySubsequences: false).map(String.init)
+        let okShape = (parts.count == 4 && parts[1] == "nvme" && parts[2] == "Expansions")
+            || (parts.count == 5 && parts[1] == "media" && parts[3] == "Expansions")
+        guard !host.isEmpty, parts.first == "", okShape, !parts.dropFirst().contains(where: { $0.isEmpty || $0 == "." || $0 == ".." })
+        else { return done(false, "Not an expansion folder: \(path)") }
+        let root = parts.count == 4 ? "/nvme" : "/media/\(parts[2])"
+        let remote = "p=\(shq(path)); grep -qF \(shq(" \(root) ")) /proc/mounts || { echo 'That drive is not mounted on the MPC'; exit 3; }; "
+            + "[ -f \"$p/Expansion.xml\" ] || { echo 'No Expansion.xml there, so not deleting it'; exit 3; }; "
+            + "grep -qi '<identifier>[[:space:]]*com\\.akaipro\\.' \"$p/Expansion.xml\" && { echo 'Akai factory expansions are protected'; exit 3; }; "
+            + "rm -rf \"$p\" && sync && [ ! -e \"$p\" ] && echo EB_OK"
+        let ssh = mpcSSH(password)
+        run("/bin/sh", ["-c", "\(sshPrefix(host)) \(shq(remote)) </dev/null"], env: ssh.env) { code, out in
+            ssh.cleanup()
+            if code == 0 && out.contains("EB_OK") { done(true, path) } else { done(false, self.cleanSSH(out, host)) }
         }
     }
 

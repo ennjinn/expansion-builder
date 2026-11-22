@@ -37,7 +37,8 @@ Requires macOS 13.4 or later (Apple Silicon or Intel). Windows support is planne
 - **Export** writes a ready-to-use expansion folder, with optional preview audio and a .zip.
 - **Send to MPC** copies the expansion straight into `Expansions` on your MPC over Wi-Fi.
 - **MPC Bridge** copies the other way: it lists the projects and audio exports on your MPC and grabs them to your Mac
-  over Wi-Fi, samples and all. A light in the header shows whether the MPC is connected.
+  over Wi-Fi, samples and all. Its Expansions tab deletes expansions you no longer want from the MPC.
+  A light in the header shows whether the MPC is connected.
 
 ## Send to MPC over Wi-Fi
 

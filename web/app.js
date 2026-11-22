@@ -1240,7 +1240,33 @@ const seqToggle = () => seq.playing ? seqStop() : seqStart();
 
 /* ---- editing ---- */
 $('#seqPlay').addEventListener('click', e => { e.currentTarget.blur(); seqToggle(); });
-$('#seqFold').addEventListener('click', () => { seq.folded = !seq.folded; renderSeq(); });
+/* Fold (▾ button or a click on an empty part of the header bar) and resize (drag the grip on the top edge).
+ * Both persist in localStorage. Height is the rows area; the window always keeps room for the columns above. */
+const seqUI = (() => { try { return JSON.parse(localStorage.getItem('eb.seq') || '{}'); } catch (e) { return {}; } })();
+const saveSeqUI = () => { try { localStorage.setItem('eb.seq', JSON.stringify(seqUI)); } catch (e) {} };
+seq.folded = !!seqUI.folded;
+function applySeqHeight() {
+  const el = $('#seq'), maxH = Math.max(120, window.innerHeight - 360);
+  if (seqUI.h) { const h = Math.max(90, Math.min(maxH, seqUI.h)); el.style.height = h + 'px'; el.style.maxHeight = 'none'; }
+  else { el.style.height = ''; el.style.maxHeight = ''; }
+  if (seq.folded) el.style.height = '';
+  if (typeof Layout !== 'undefined') Layout.apply();
+}
+function toggleSeqFold(on = !seq.folded) { seq.folded = on; seqUI.folded = on; saveSeqUI(); renderSeq(); applySeqHeight(); }
+$('#seqFold').addEventListener('click', () => toggleSeqFold());
+$('#seq .seq-head').addEventListener('click', e => { if (e.target === e.currentTarget || e.target.closest('h2') || e.target.classList.contains('seq-hint')) toggleSeqFold(); });
+$('#seqGrip').addEventListener('mousedown', e => {
+  e.preventDefault();
+  const el = $('#seq'), y0 = e.clientY, h0 = el.getBoundingClientRect().height;
+  if (seq.folded) { seq.folded = false; seqUI.folded = false; renderSeq(); }
+  document.body.classList.add('row-resizing');
+  const move = ev => { seqUI.h = Math.round(h0 - (ev.clientY - y0)); if (seqUI.h < 70) { seqUI.h = 90; toggleSeqFold(true); up(); return; } applySeqHeight(); };
+  const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); document.body.classList.remove('row-resizing'); saveSeqUI(); };
+  window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
+});
+$('#seqGrip').addEventListener('dblclick', () => { delete seqUI.h; saveSeqUI(); if (seq.folded) toggleSeqFold(false); applySeqHeight(); });
+window.addEventListener('resize', applySeqHeight);
+applySeqHeight();
 $('#seqClear').addEventListener('click', () => {
   const rows = seqRows(); if (!rows.some(r => seqNotes(r).length)) return;
   pushUndo(); kit().pads.forEach(p => { if (!p) return; delete p.seq; p.quads.forEach(Q => delete Q.seq); }); markDirty(); renderSeq();
