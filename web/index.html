@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Expansion Builder</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div>
+        <h1>EXPANSION <span>BUILDER</span></h1>
+        <p class="sub">Drop samples on pads, flip pads into <b>MPCe</b> mode for 64 strike zones, export an MPC expansion.</p>
+      </div>
+    </div>
+    <div id="tuner" class="tuner" title="Fundamental of the last sound played"></div>
+    <div class="top-actions">
+      <span id="projName" class="proj-name"></span>
+      <button class="btn ghost" id="brToggle" title="Show / hide the sample browser">Browser</button>
+      <button class="btn ghost" data-act="new">New</button>
+      <button class="btn ghost" data-act="open">Open…</button>
+      <button class="btn ghost" data-act="save">Save</button>
+    </div>
+  </header>
+
+  <main class="cols">
+    <!-- 1 · EXPANSION -->
+    <section class="panel col-exp" data-col="exp">
+      <div class="col-strip" data-unfold="exp" title="Show the Expansion &amp; Export panel">
+        <button class="col-fold" title="Expand">›</button>
+        <span class="strip-lbl"><em>1</em>Expansion · <em>5</em>Export</span>
+        <button class="btn primary strip-exp" data-act="export" title="Export expansion">⬇</button>
+      </div>
+      <h2><em>1</em>Expansion<button class="col-fold" data-fold="exp" title="Collapse this panel">‹</button></h2>
+      <div id="art" class="art" title="Click or drop an image">
+        <div class="art-empty">Drop cover art<br><small>or click to choose · square works best</small></div>
+      </div>
+      <div class="art-row"><button class="btn small" id="artRemove">Remove image</button></div>
+      <label>Expansion name<input id="expName" placeholder="Trap Drums Vol. 1"></label>
+      <label>Author / brand<input id="expAuthor" placeholder="Your name"></label>
+      <label>Description <small>(optional)</small><textarea id="expDesc" rows="3"></textarea></label>
+      <details class="adv">
+        <summary>Advanced</summary>
+        <label>Version<input id="expVersion" placeholder="1.0.0"></label>
+        <label>Identifier <small>(auto if blank)</small><input id="expId" placeholder="com.author.name"></label>
+      </details>
+
+      <h2 class="mt"><em>5</em>Export</h2>
+      <div class="preview-card">
+        <div id="pcArt" class="pc-art"></div>
+        <div><b id="pcTitle">Untitled</b><small id="pcMeta"></small></div>
+      </div>
+      <div class="checks">
+        <label class="chk"><input type="checkbox" id="optZip"> Also make a .zip</label>
+        <label class="chk"><input type="checkbox" id="optPreview" checked> Render kit preview audio</label>
+      </div>
+      <button class="btn primary big" data-act="export">⬇ Export expansion</button>
+      <button class="btn primary big" data-act="sendMPC" title="Builds the expansion and copies it straight into Expansions on the MPC">📡 Send to MPC</button>
+      <button class="btn big" data-act="exportKit">Current kit only (no expansion)</button>
+      <h2 class="mt">MPC over Wi-Fi</h2>
+      <div id="mpcBox" class="mpc-box">
+        <label>MPC address<input id="mpcHost" placeholder="e.g. 192.168.1.50"></label>
+        <div class="row2">
+          <label>Drive<input id="mpcDrive" placeholder="nvme"></label>
+          <label>SSH password<input id="mpcPw" type="password" placeholder="(if any)"></label>
+        </div>
+      </div>
+      <div id="exportLog" class="log" hidden></div>
+    </section>
+
+    <!-- 2 · KITS / BANKS / PADS -->
+    <div class="gutter" title="Drag to resize · double-click to reset"></div>
+    <section class="panel col-pads" data-col="pads">
+      <div class="kit-tabs" id="kitTabs"></div>
+      <div class="kit-tools">
+        <button class="btn small" data-act="muteByColor" title="Every pad in all 8 banks with the same colour gets the same mute group, numbered from the first pad (A01) on. Pads on automatic colour are set to Off.">Mute groups by colour</button>
+      </div>
+      <div class="lcd">
+        <div class="lcd-l">
+          <div class="lcd-kit"><span>KIT</span><input id="kitName" spellcheck="false"></div>
+          <div class="lcd-meta" id="lcdMeta"></div>
+        </div>
+        <div class="lcd-r">
+          <label class="lcd-ctl">VEL <input type="range" id="testVel" min="1" max="127" value="100"><b id="testVelV">100</b></label>
+        </div>
+      </div>
+      <div class="grid-wrap"><div class="pad-grid" id="padGrid"></div></div>
+      <div class="banks" id="banks"></div>
+      <ul class="hints">
+        <li>Drop sounds or a folder onto a pad</li>
+        <li>Drag a pad onto another to swap</li>
+        <li>Click a pad or quadrant to play &amp; edit</li>
+        <li>Keys 1-4 / Q-R / A-F / Z-V play pads</li>
+        <li><b>⌥-click</b> a pad to toggle MPCe</li>
+      </ul>
+    </section>
+
+    <!-- 3 · PAD / QUADRANT -->
+    <div class="gutter" title="Drag to resize · double-click to reset"></div>
+    <section class="panel col-detail" id="detail" data-col="detail"></section>
+
+    <!-- 4 · SAMPLE LIBRARY -->
+    <div class="gutter" title="Drag to resize · double-click to reset"></div>
+    <section class="panel col-lib" data-col="lib">
+      <div class="col-strip" data-unfold="lib" title="Show the Sample library">
+        <button class="col-fold" title="Expand">‹</button>
+        <span class="strip-lbl"><em>4</em>Sample library <small id="libStripCount"></small></span>
+      </div>
+      <h2><em>4</em>Sample library<button class="col-fold" data-fold="lib" title="Collapse this panel">›</button></h2>
+      <div id="libDrop" class="dropzone">Drop sounds or a folder<br><small>or click to browse</small></div>
+      <input id="libSearch" class="search" placeholder="Search…">
+      <div class="lib-count" id="libCount"></div>
+      <ul id="libList" class="lib-list"></ul>
+      <div class="lib-actions">
+        <button class="btn small" id="fillEmpty" title="Put unused samples on empty pads, starting from the current bank">Fill empty pads</button>
+        <button class="btn small" id="clearUnused">Remove unused</button>
+      </div>
+    </section>
+
+    <!-- SAMPLE BROWSER (auto-categorised) -->
+    <div class="gutter" data-g="browser" title="Drag to resize · double-click to reset"></div>
+    <section class="panel col-browser" id="browser" data-col="browser">
+      <div class="br-head">
+        <h2><em>&#8981;</em>Browser</h2>
+        <span class="br-root" id="brRoot"></span>
+        <button class="btn tiny" id="brFolder" title="Choose the samples folder">Folder…</button>
+        <button class="btn tiny" id="brRescan" title="Rescan the folder for new or removed files">&#10227;</button>
+      </div>
+      <div class="br-body">
+        <ul class="br-cats" id="brCats"></ul>
+        <div class="br-main">
+          <input id="brSearch" class="search" placeholder="Filter by name or folder…" spellcheck="false">
+          <div class="br-filters">
+            <select id="brPack"></select>
+            <label class="chk" title="Hide copies of the same sound (same name and size) shipped in other formats"><input type="checkbox" id="brDedupe" checked>No dupes</label>
+          </div>
+          <div class="br-count" id="brCount"></div>
+          <div class="br-list" id="brList" tabindex="0"><div class="br-spacer" id="brSpacer"></div><div id="brRows"></div></div>
+          <div class="br-hint">Click / &uarr;&darr; to preview &middot; &larr;&rarr; category &middot; Enter or double-click puts it on the selected pad &middot; or drag onto a pad</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- TEST SEQUENCER (preview only — never exported) -->
+  <section class="panel seq" id="seq">
+    <div class="seq-head">
+      <h2><em>♪</em>Test sequencer</h2>
+      <button class="btn small seq-play" id="seqPlay" title="Play / stop (Space)">▶ Play</button>
+      <label class="seq-bpm">BPM <input type="number" id="testBpm" min="40" max="300" step="1" value="120"></label>
+      <button class="btn tiny" id="seqClear" title="Clear every note in this kit's pattern">Clear pattern</button>
+      <span class="seq-hint">Click a step to add · drag sideways = length · drag up/down = velocity · click a note to remove · not exported</span>
+      <button class="btn tiny" id="seqFold" title="Show / hide the rows">▾</button>
+    </div>
+    <div class="seq-body" id="seqBody"></div>
+  </section>
+  <div id="toast"></div>
+  <div id="busy" hidden><div class="busy-box"><div class="spin"></div><div id="busyText">Working…</div></div></div>
+</div>
+<script src="articulations.js"></script>
+<script src="floatkeys.js"></script>
+<script src="audio.js"></script>
+<script src="export.js"></script>
+<script src="tuner.js"></script>
+<script src="categorize.js"></script>
+<script src="app.js"></script>
+<script src="layout.js"></script>
+<script src="browser.js"></script>
+</body>
+</html>
