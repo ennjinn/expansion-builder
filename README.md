@@ -21,6 +21,8 @@ The app isn't notarized by Apple, so macOS blocks it the first time you open it.
 
 Requires macOS 13.4 or later (Apple Silicon or Intel). Windows support is planned.
 
+**New here? Read the [User Guide](GUIDE.md)** for setup, building a kit, and sending it to your MPC.
+
 ## Features
 
 - **Kits, 8 banks × 16 pads.** Drop sounds or whole folders onto pads, or drag pads around to swap them.
@@ -37,13 +39,13 @@ Requires macOS 13.4 or later (Apple Silicon or Intel). Windows support is planne
 
 ## Send to MPC over Wi-Fi
 
-This needs SSH access to your MPC. Fill in the **MPC over Wi-Fi** fields in the Export panel:
+This needs developer mode turned on on your MPC (the [User Guide](GUIDE.md#2-set-up-your-mpc-for-wi-fi-sending-optional) shows how). Fill in the **MPC over Wi-Fi** fields in the Export panel:
 
 | Field | What to enter |
 |---|---|
 | MPC address | The MPC's IP address (on the MPC: Preferences → Wi-Fi) |
 | Drive | `nvme` for the internal drive, or the name of an SD card or USB drive |
-| SSH password | Your MPC's root password |
+| SSH password | Leave blank. Developer mode doesn't use one. |
 
 Sending an expansion with the same name replaces the copy on the MPC. If it doesn't show up straight
 away, re-open Browse → Expansions on the MPC.
