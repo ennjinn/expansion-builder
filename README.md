@@ -11,8 +11,13 @@ expansion to a folder or send it straight to your MPC over Wi-Fi.
 Get the latest `Expansion-Builder-mac.zip` from **[Releases](../../releases)**, unzip it, and move
 **Expansion Builder** to Applications.
 
-The app isn't signed with an Apple developer ID, so the first time you open it, **right-click → Open**
-and confirm. If macOS still blocks it, go to System Settings → Privacy & Security → **Open Anyway**.
+The app isn't notarized by Apple, so macOS blocks it the first time you open it. To allow it:
+
+1. Open the app once. When macOS says it can't verify it, click **Done**.
+2. Go to System Settings → Privacy & Security, scroll down, and click **Open Anyway** next to Expansion Builder.
+3. Confirm with your password. After that it opens normally.
+
+(On macOS 14 and earlier you can instead right-click the app → **Open**.)
 
 Requires macOS 13.4 or later (Apple Silicon or Intel). Windows support is planned.
 
