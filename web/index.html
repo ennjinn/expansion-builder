@@ -13,7 +13,6 @@
       <div class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <div>
         <h1>EXPANSION <span>BUILDER</span></h1>
-        <p class="sub">Drop samples on pads, flip pads into <b>MPCe</b> mode for 64 strike zones, export an MPC expansion.</p>
       </div>
     </div>
     <div id="tuner" class="tuner" title="Fundamental of the last sound played"></div>
@@ -24,7 +23,7 @@
         <button class="btn tiny" id="mpcConnBtn">Connect</button>
       </div>
       <button class="btn bridge-btn" id="bridgeBtn" title="Grab projects and audio from your MPC over Wi-Fi">📡 MPC Bridge <span class="caret">▾</span></button>
-      <button class="btn ghost" id="brToggle" title="Show / hide the sample browser">Browser</button>
+      <button class="btn ghost" id="brToggle" title="Show / hide the Sample Library">Sample Library</button>
       <button class="btn ghost" data-act="new">New</button>
       <button class="btn ghost" data-act="open">Open…</button>
       <button class="btn ghost" data-act="save">Save</button>
@@ -135,11 +134,11 @@
     <!-- 4 · SAMPLE LIBRARY -->
     <div class="gutter" title="Drag to resize · double-click to reset"></div>
     <section class="panel col-lib" data-col="lib">
-      <div class="col-strip" data-unfold="lib" title="Show the Sample library">
+      <div class="col-strip" data-unfold="lib" title="Show Expansion Samples">
         <button class="col-fold" title="Expand">‹</button>
-        <span class="strip-lbl"><em>4</em>Sample library <small id="libStripCount"></small></span>
+        <span class="strip-lbl"><em>4</em>Expansion Samples <small id="libStripCount"></small></span>
       </div>
-      <h2><em>4</em>Sample library<button class="col-fold" data-fold="lib" title="Collapse this panel">›</button></h2>
+      <h2><em>4</em>Expansion Samples<button class="col-fold" data-fold="lib" title="Collapse this panel">›</button></h2>
       <div id="libDrop" class="dropzone">Drop sounds or a folder<br><small>or click to browse</small></div>
       <input id="libSearch" class="search" placeholder="Search…">
       <div class="lib-count" id="libCount"></div>
@@ -154,7 +153,7 @@
     <div class="gutter" data-g="browser" title="Drag to resize · double-click to reset"></div>
     <section class="panel col-browser" id="browser" data-col="browser">
       <div class="br-head">
-        <h2><em>&#8981;</em>Browser</h2>
+        <h2><em>&#8981;</em>Sample Library</h2>
         <span class="br-root" id="brRoot"></span>
         <button class="btn tiny" id="brFolder" title="Choose the samples folder">Folder…</button>
         <button class="btn tiny" id="brRescan" title="Rescan the folder for new or removed files">&#10227;</button>

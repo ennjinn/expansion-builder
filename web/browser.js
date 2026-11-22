@@ -27,7 +27,7 @@ const Browser = (() => {
 
   /* ---------------- loading ---------------- */
   async function load(refresh = false) {
-    if (!hasBridge) { setStatus('The browser needs the Expansion Builder app.'); return; }
+    if (!hasBridge) { setStatus('The Sample Library needs the Expansion Builder app.'); return; }
     st.loading = true;
     setStatus(refresh ? 'Rescanning…' : 'Loading library…');
     try {

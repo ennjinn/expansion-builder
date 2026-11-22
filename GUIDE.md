@@ -91,15 +91,16 @@ The light checks again every 30 seconds and whenever you switch back to the app.
 ## 3. A quick tour
 
 The window is split into columns. Drag the thin gutters between them to resize, and click **‹ / ›** to fold
-a panel away.
+any panel down to a thin strip (click the strip to bring it back). To change the order, **drag a panel by its
+header** (or a folded strip) left or right. The app remembers the order, widths and folds.
 
 | Column | What it's for |
 |---|---|
 | **1 · Expansion / 5 · Export** (left) | Expansion name, author, description, cover art, and the Export / Send buttons |
 | **2 · Kits** | Kit tabs, the kit name, 8 banks (A to H) of 16 pads |
 | **3 · Pad details** | Everything about the selected pad: samples, layers, articulation, sound, colour, mute group |
-| **4 · Sample library** | The sounds you've added to this project |
-| **Browser** (toggle at top right) | Your whole samples folder, sorted into categories automatically |
+| **4 · Expansion Samples** (folded by default) | The sounds you've added to this project |
+| **Sample Library** (toggle at top right) | Your whole samples folder, sorted into categories automatically |
 | **Test sequencer** (bottom) | A small pattern editor for hearing your kit; it isn't exported |
 
 The small readout in the header shows the pitch of the last sound you played (for example, `D1 −13 ct`),
@@ -114,11 +115,11 @@ which is handy for tuning kicks and 808s.
 Use whichever way is quickest for you:
 
 - **Drag from Finder** onto a pad. Drop a **folder** to fill pads in order.
-- **Use the Browser.** Click **Browser** at the top right. The first time, click **Folder…** to choose your
+- **Use the Sample Library.** Click **Sample Library** at the top right. The first time, click **Folder…** to choose your
   samples folder (it defaults to `~/Documents/Samples`). Sounds are sorted into Kicks, Snares, Hi-Hats,
   Loops and so on. Click a sound to hear it, then **drag it onto a pad**, or press **Enter**
   (or double-click) to put it on the selected pad. The arrow keys move through the list.
-- **Use the Sample library.** Drop sounds into it, then drag them onto pads. **Fill empty pads** puts every
+- **Use Expansion Samples.** Drop sounds into it, then drag them onto pads. **Fill empty pads** puts every
   unused sound onto the empty pads, starting from the current bank.
 
 ### Work with pads
@@ -311,7 +312,7 @@ Leave **Browse → Expansions** and open it again. If it still isn't there, rest
 Click **Allow**. If you want it never to ask, add Expansion Builder under System Settings →
 Privacy & Security → **Full Disk Access**.
 
-**The Browser is empty or out of date**
+**The Sample Library is empty or out of date**
 Click **Folder…** to point it at your samples folder, or **⟳** to rescan after adding new sounds.
 
 ---

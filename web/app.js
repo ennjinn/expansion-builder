@@ -1244,6 +1244,7 @@ $('#seqPlay').addEventListener('click', e => { e.currentTarget.blur(); seqToggle
  * Both persist in localStorage. Height is the rows area; the window always keeps room for the columns above. */
 const seqUI = (() => { try { return JSON.parse(localStorage.getItem('eb.seq') || '{}'); } catch (e) { return {}; } })();
 const saveSeqUI = () => { try { localStorage.setItem('eb.seq', JSON.stringify(seqUI)); } catch (e) {} };
+if (seqUI.v !== 2) { seqUI.v = 2; seqUI.folded = true; saveSeqUI(); }   // folded by default (once for everyone)
 seq.folded = !!seqUI.folded;
 function applySeqHeight() {
   const el = $('#seq'), maxH = Math.max(120, window.innerHeight - 360);

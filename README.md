@@ -31,9 +31,13 @@ Requires macOS 13.4 or later (Apple Silicon or Intel). Windows support is planne
   Choose snap-to-corner or morph.
 - **Pad details.** One-shot / note-on, mono, mute groups, pad colours, and a large waveform for setting start points.
 - **Mute groups by colour.** One click gives every pad of the same colour (across all 8 banks) the same mute group.
-- **Sample browser.** Indexes your samples folder and sorts it into categories (kicks, snares, hats, loops, …)
+- **Sample Library.** Indexes your samples folder and sorts it into categories (kicks, snares, hats, loops, …)
   automatically. A built-in tuner shows the pitch of the sound you just played.
+- **Expansion Samples.** Every sound used in the project, with Fill empty pads and Remove unused. It's folded by default.
 - **Test sequencer.** Program a quick pattern to hear the kit. It's for previewing only and isn't exported.
+  Drag its top edge to resize it, or fold it away (folded by default).
+- **Your layout.** Drag a panel by its header to reorder the panels, drag the gutters to resize them, and fold
+  any panel to a thin strip. The app remembers your layout.
 - **Export** writes a ready-to-use expansion folder, with optional preview audio and a .zip.
 - **Send to MPC** copies the expansion straight into `Expansions` on your MPC over Wi-Fi.
 - **MPC Bridge** copies the other way: it lists the projects and audio exports on your MPC and grabs them to your Mac

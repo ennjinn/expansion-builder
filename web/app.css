@@ -38,8 +38,6 @@ button { font: inherit; color: inherit; }
 .logo i:nth-child(5) { background: rgba(255, 255, 255, .45); }
 h1 { margin: 0; font: 900 34px/1 var(--sans); letter-spacing: .08em; }
 h1 span { color: var(--red); }
-.sub { margin: 6px 0 0; color: var(--dim); font-size: 13px; }
-.sub b { color: var(--violet); }
 .top-actions { display: flex; align-items: center; gap: 8px; }
 .proj-name { color: var(--faint); font-size: 12px; margin-right: 6px; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -452,3 +450,10 @@ h2 .col-fold { margin-left: auto; }
 .seq-head h2, .seq-head .seq-hint { cursor: pointer; }
 .seq.folded { padding-bottom: 10px; }
 .seq-body { flex: 1; }
+/* Panel reorder + fold for every panel (layout.js) */
+#app .cols > .panel.collapsed { padding: 10px 0; overflow: hidden; }
+.kit-tools .col-fold, .br-head .col-fold { margin-left: auto; }
+[data-col] > h2, .br-head, .kit-tools { cursor: grab; }
+[data-col] > h2 button, .br-head button, .br-head input, .kit-tools button { cursor: pointer; }
+.panel.col-moving { opacity: .75; outline: 2px dashed var(--red); outline-offset: -2px; }
+.col-reordering, .col-reordering * { cursor: grabbing !important; -webkit-user-select: none; user-select: none; }
